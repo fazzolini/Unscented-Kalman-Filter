@@ -13,58 +13,58 @@ using Eigen::VectorXd;
 class UKF {
 public:
 
-  ///* initially set to false, set to true in first call of ProcessMeasurement
+  ///* Initially set to false, set to true in first call of ProcessMeasurement [DONE]
   bool is_initialized_;
 
-  ///* if this is false, laser measurements will be ignored (except for init)
+  ///* If this is false, laser measurements will be ignored (except for init) [OK]
   bool use_laser_;
 
-  ///* if this is false, radar measurements will be ignored (except for init)
+  ///* If this is false, radar measurements will be ignored (except for init) [OK]
   bool use_radar_;
 
-  ///* state vector: [pos1 pos2 vel_abs yaw_angle yaw_rate] in SI units and rad
-  VectorXd x_;
+  ///* State vector: [pos1 pos2 vel_abs yaw_angle yaw_rate] in SI units and rad [OK]
+  VectorXd x_; // initialized
 
-  ///* state covariance matrix
+  ///* State covariance matrix [OK]
   MatrixXd P_;
 
-  ///* predicted sigma points matrix
-  MatrixXd Xsig_pred_;
-
-  ///* time when the state is true, in us
+  ///* Time when the state is true, in us [DONE]
   long long time_us_;
 
-  ///* Process noise standard deviation longitudinal acceleration in m/s^2
+  ///* Process noise standard deviation longitudinal acceleration in m/s^2 [OK]
   double std_a_;
 
-  ///* Process noise standard deviation yaw acceleration in rad/s^2
+  ///* Process noise standard deviation yaw acceleration in rad/s^2 [OK]
   double std_yawdd_;
 
-  ///* Laser measurement noise standard deviation position1 in m
+  ///* Laser measurement noise standard deviation position1 in m [OK]
   double std_laspx_;
 
-  ///* Laser measurement noise standard deviation position2 in m
+  ///* Laser measurement noise standard deviation position2 in m [OK]
   double std_laspy_;
 
-  ///* Radar measurement noise standard deviation radius in m
+  ///* Radar measurement noise standard deviation radius in m [OK]
   double std_radr_;
 
-  ///* Radar measurement noise standard deviation angle in rad
+  ///* Radar measurement noise standard deviation angle in rad [OK]
   double std_radphi_;
 
-  ///* Radar measurement noise standard deviation radius change in m/s
-  double std_radrd_ ;
+  ///* Radar measurement noise standard deviation radius change in m/s [OK]
+  double std_radrd_;
 
-  ///* Weights of sigma points
-  VectorXd weights_;
-
-  ///* State dimension
+  ///* State dimension [DONE]
   int n_x_;
 
-  ///* Augmented state dimension
+  ///* Augmented state dimension [DONE]
   int n_aug_;
 
-  ///* Sigma point spreading parameter
+  ///* Weights of sigma points [DONE]
+  VectorXd weights_;
+
+  ///* Predicted sigma points matrix [DONE]
+  MatrixXd Xsig_pred_;
+
+  ///* Sigma point spreading parameter [DONE]
   double lambda_;
 
 
