@@ -93,6 +93,44 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
   Complete this function! Make sure you switch between lidar and radar
   measurements.
   */
+
+  /**
+   * Workflow follows approach from previous project (EKF)
+   * In fact, this is any Bayes Filter approach
+   * 1. Initialization
+   * 2. Prediction
+   * 3. Measurement Update
+   */
+
+  /*****************************************************************************
+   *  1. Initialization
+   ****************************************************************************/
+
+  /**
+   * TODO: Initialize
+   */
+
+  // code
+
+  /*****************************************************************************
+   *  2. Prediction
+   ****************************************************************************/
+
+  /**
+   * TODO: Predict
+   */
+
+  // code
+
+  /*****************************************************************************
+   *  3. Measurement Update
+   ****************************************************************************/
+
+  /**
+   * TODO: Update
+   */
+
+  // code
 }
 
 /**
