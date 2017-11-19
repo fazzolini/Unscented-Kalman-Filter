@@ -11,16 +11,16 @@ using std::vector;
  * Initializes Unscented Kalman filter
  */
 UKF::UKF() {
-  // if this is false, laser measurements will be ignored (except during init)
+  // If this is false, laser measurements will be ignored (except during init)
   use_laser_ = true;
 
-  // if this is false, radar measurements will be ignored (except during init)
+  // If this is false, radar measurements will be ignored (except during init)
   use_radar_ = true;
 
-  // initial state vector
+  // Initial state vector
   x_ = VectorXd(5);
 
-  // initial covariance matrix
+  // Initial covariance matrix
   P_ = MatrixXd(5, 5);
 
   // Process noise standard deviation longitudinal acceleration in m/s^2
@@ -45,12 +45,39 @@ UKF::UKF() {
   std_radrd_ = 0.3;
 
   /**
-  TODO:
+  TODO: [DONE]
 
   Complete the initialization. See ukf.h for other member properties.
 
   Hint: one or more values initialized above might be wildly off...
   */
+
+  /**
+   * Note: I consecutively checked ukf.h for which vars were already
+   * initialized above and then initialized myself missing ones
+   */
+
+  ///* Initially set to false, set to true in first call of ProcessMeasurement
+  is_initialized_ = false;
+
+  ///* Time when the state is true, in us (initial time is zero)
+  time_us_ = 0.0;
+
+  ///* State dimension (as per CTRV model)
+  n_x_ = 5;
+
+  ///* Augmented state dimension (state dim + 2 for process noise)
+  n_aug_ = n_x_ + 2;
+
+  ///* Weights of sigma points (center point + 2 for each dimension of augmented vector)
+  weights_ = VectorXd(2 * n_aug_ + 1);
+
+  ///* Predicted sigma points matrix (rows: state vector length, cols: num of sigma points)
+  Xsig_pred_ = MatrixXd(n_x_, 2 * n_aug_ + 1);
+
+  ///* Sigma point spreading parameter (as per classroom solution)
+  lambda_ = 3 - n_x_;
+
 }
 
 UKF::~UKF() {}
