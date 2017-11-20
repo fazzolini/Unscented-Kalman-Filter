@@ -47,6 +47,10 @@ UKF::UKF() {
   // Radar measurement noise standard deviation radius change in m/s
   std_radrd_ = 0.3;
 
+  /*****************************************************************************
+   *  ADDITIONAL INITIALIZATIONS
+   ****************************************************************************/
+
   /**
   TODO: [DONE]
 
@@ -91,7 +95,7 @@ UKF::~UKF() {}
  */
 void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
   /**
-  TODO:
+  TODO: [DONE]
 
   Complete this function! Make sure you switch between lidar and radar
   measurements.
@@ -110,11 +114,57 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
    ****************************************************************************/
 
   /**
-   * TODO: Initialize
+   * TODO: Initialize [DONE]
+   * 1. Set initial state
+   * 2. Set initial covariance matrix
+   * 3. Process first lidar or radar measurement
+   * 4. Set timestamp
+   * 5. Set initialization flag
    */
 
   if (!is_initialized_) {
-    // code
+
+    // Set initial x. NOTE: [pos1 pos2 vel_abs yaw_angle yaw_rate]
+    x_ <<   1, 1, 1, 1, 1;
+
+    // Set initial covariance matrix
+    P_ <<   1, 0, 0, 0, 0,
+            0, 1, 0, 0, 0,
+            0, 0, 1, 0, 0,
+            0, 0, 0, 1, 0,
+            0, 0, 0, 0, 1;
+
+    // Process initial measurements
+    if (meas_package.sensor_type_ == MeasurementPackage::LASER) {
+
+      // Process initial laser measurement.
+      // NOTE: laser gives positions for x and y
+      x_(0) = meas_package.raw_measurements_(0);
+      x_(1) = meas_package.raw_measurements_(1);
+
+    } else if (meas_package.sensor_type_ == MeasurementPackage::RADAR) {
+
+      // Process initial radar measurement.
+      // NOTE: radar gives distance rho, angle phi, speed in rho direction rho_dot
+      // Can determine x and y position
+
+      // Extract measurements
+      float rho =     meas_package.raw_measurements_(0);
+      float phi =     meas_package.raw_measurements_(1);
+//      float rho_dot = meas_package.raw_measurements_(2); // not used (for now)
+
+      // Update state
+      x_(0) = rho * cos(phi); // distance projection on vertical axis x
+      x_(1) = rho * sin(phi); // distance projection on vertical axis x
+
+    }
+
+    // Set time stamp
+    time_us_ = meas_package.timestamp_;
+
+    // Set initialization flag
+    is_initialized_ = true;
+
   }
 
   /*****************************************************************************

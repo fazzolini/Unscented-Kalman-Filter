@@ -70,6 +70,10 @@ public:
   ///* Sigma point spreading parameter [DONE]
   double lambda_;
 
+  /*****************************************************************************
+   *  ADDITIONAL DECLARATIONS
+   ****************************************************************************/
+
 
   /**
    * Constructor
