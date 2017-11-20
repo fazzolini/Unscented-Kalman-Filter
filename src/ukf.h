@@ -3,6 +3,7 @@
 
 #include "measurement_package.h"
 #include "Eigen/Dense"
+#include "tools.h"
 #include <vector>
 #include <string>
 #include <fstream>
@@ -85,6 +86,9 @@ public:
 
   ///* Predicted sigma points
   MatrixXd Xsig_pred_;
+
+  ///* Instance of tools
+  Tools tools_;
 
   /*****************************************************************************
    *  ADDITIONAL DECLARATIONS OF VARS [END]

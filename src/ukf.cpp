@@ -403,7 +403,7 @@ void UKF::PredictMeanAndCovariance() {
     VectorXd x_diff = Xsig_pred_.col(i) - x_;
 
     // Angle normalization
-    x_diff(3) = tools.NormalizePhi(x_diff(3));
+    x_diff(3) = tools_.NormalizePhi(x_diff(3));
 
     // Update state covariance matrix
     P_ = P_ + weights_(i) * x_diff * x_diff.transpose();
