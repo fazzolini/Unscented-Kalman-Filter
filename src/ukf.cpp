@@ -54,6 +54,12 @@ UKF::UKF() {
   ///* Used to calculate time difference between measurements
   dt_ = 0.0;
 
+  ///* Initialize sigma point matrix
+  Xsig_aug_ = MatrixXd(n_aug_, 2 * n_aug_ + 1);
+
+  ///* Initialize predictions matrix
+  Xsig_pred_ = MatrixXd(n_x_, 2 * n_aug_ + 1);
+
   /**
   TODO: UKF Initialization [DONE]
 
@@ -227,7 +233,7 @@ void UKF::Prediction(double delta_t) {
 
   AugmentedSigmaPoints();
 
-  SigmaPointPrediction();
+  SigmaPointPrediction(delta_t);
 
   PredictMeanAndCovariance();
 
@@ -269,14 +275,14 @@ void UKF::AugmentedSigmaPoints() {
    * TODO: Generate Aug Sigma Points [DONE]
    */
 
+  // Clear old values (possibly not needed)
+  Xsig_aug_.fill(0.0);
+
   // Create augmented mean vector
   VectorXd x_aug = VectorXd(n_aug_);
 
   // Create augmented state covariance
   MatrixXd P_aug = MatrixXd(n_aug_, n_aug_);
-
-  // Create sigma point matrix
-  Xsig_aug_ = MatrixXd(n_aug_, 2 * n_aug_ + 1);
 
   // Create augmented mean state
   x_aug.head(5) = x_;
@@ -301,14 +307,65 @@ void UKF::AugmentedSigmaPoints() {
     Xsig_aug_.col(i + 1 + n_aug_) = x_aug - sqrt(lambda_ + n_aug_) * L.col(i);
 
   }
-
 }
 
-void UKF::SigmaPointPrediction() {
+void UKF::SigmaPointPrediction(float delta_t) {
   /**
-   * TODO: Predict Aug Sigma Points
+   * TODO: Predict Aug Sigma Points [DONE]
    */
 
+  // Clear old values (possibly not needed)
+  Xsig_pred_.fill(0.0);
+
+  // Loop through generated sigma points and
+  // make prediction for each one of them.
+  // All math is according to classroom equations
+  for (int i = 0; i < 2 * n_aug_ + 1; i++) {
+
+    // Extract values for better readability
+    double p_x      = Xsig_aug_(0, i);
+    double p_y      = Xsig_aug_(1, i);
+    double v        = Xsig_aug_(2, i);
+    double yaw      = Xsig_aug_(3, i);
+    double yawd     = Xsig_aug_(4, i);
+    double nu_a     = Xsig_aug_(5, i);
+    double nu_yawdd = Xsig_aug_(6, i);
+
+    // Predicted state values
+    double px_p, py_p;
+
+    // Deal with division by zero
+    if (fabs(yawd) > 0.001) {
+
+      px_p = p_x + v / yawd * (sin(yaw + yawd * delta_t) - sin(yaw));
+      py_p = p_y + v / yawd * (cos(yaw) - cos(yaw + yawd * delta_t));
+
+    } else {
+
+      px_p = p_x + v * delta_t * cos(yaw);
+      py_p = p_y + v * delta_t * sin(yaw);
+
+    }
+
+    double v_p    = v;
+    double yaw_p  = yaw + yawd * delta_t;
+    double yawd_p = yawd;
+
+    // Add noise according to equations
+    px_p    = px_p + 0.5 * nu_a * delta_t * delta_t * cos(yaw);
+    py_p    = py_p + 0.5 * nu_a * delta_t * delta_t * sin(yaw);
+    v_p     = v_p + nu_a * delta_t;
+    yaw_p   = yaw_p + 0.5 * nu_yawdd * delta_t * delta_t;
+    yawd_p  = yawd_p + nu_yawdd * delta_t;
+
+    // Write predicted sigma point into i-th column
+    Xsig_pred_(0, i) = px_p;
+    Xsig_pred_(1, i) = py_p;
+    Xsig_pred_(2, i) = v_p;
+    Xsig_pred_(3, i) = yaw_p;
+    Xsig_pred_(4, i) = yawd_p;
+
+  }
 }
 
 void UKF::PredictMeanAndCovariance() {

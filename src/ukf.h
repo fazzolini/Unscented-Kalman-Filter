@@ -83,6 +83,9 @@ public:
   ///* Augmented state matrix
   MatrixXd Xsig_aug_;
 
+  ///* Predicted sigma points
+  MatrixXd Xsig_pred_;
+
   /*****************************************************************************
    *  ADDITIONAL DECLARATIONS OF VARS [END]
    ****************************************************************************/
@@ -137,9 +140,9 @@ public:
   /**
    * Uses augmented sigma points matrix to make predictions
    * for each point and store it in a separate matrix.
-   * Takes no params and returns nothing because it operates on class variables.
+   * Returns nothing because it operates on class variables.
    */
-  void SigmaPointPrediction();
+  void SigmaPointPrediction(float delta_t);
 
   /**
    * Based on sigma points predictions calculate inferred
