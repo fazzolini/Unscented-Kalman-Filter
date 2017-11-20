@@ -55,7 +55,7 @@ UKF::UKF() {
   dt = 0.0;
 
   /**
-  TODO: [DONE]
+  TODO: UKF Initialization [DONE]
 
   Complete the initialization. See ukf.h for other member properties.
 
@@ -98,7 +98,7 @@ UKF::~UKF() {}
  */
 void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
   /**
-  TODO: [DONE]
+  TODO: ProcessMeasurement() [DONE]
 
   Complete this function! Make sure you switch between lidar and radar
   measurements.
@@ -210,7 +210,7 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
  */
 void UKF::Prediction(double delta_t) {
   /**
-  TODO:
+  TODO: Prediction()
 
   Complete this function! Estimate the object's location. Modify the state
   vector, x_. Predict sigma points, the state, and the state covariance matrix.
@@ -223,7 +223,7 @@ void UKF::Prediction(double delta_t) {
  */
 void UKF::UpdateLidar(MeasurementPackage meas_package) {
   /**
-  TODO:
+  TODO: UpdateLidar()
 
   Complete this function! Use lidar data to update the belief about the object's
   position. Modify the state vector, x_, and covariance, P_.
@@ -238,7 +238,7 @@ void UKF::UpdateLidar(MeasurementPackage meas_package) {
  */
 void UKF::UpdateRadar(MeasurementPackage meas_package) {
   /**
-  TODO:
+  TODO: UpdateRadar()
 
   Complete this function! Use radar data to update the belief about the object's
   position. Modify the state vector, x_, and covariance, P_.
