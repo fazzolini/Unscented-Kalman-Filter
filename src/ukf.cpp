@@ -192,10 +192,15 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
    ****************************************************************************/
 
   /**
-   * TODO: Update
+   * TODO: Update [DONE]
+   * Call different update function depending on the type of measurement
    */
 
-  // code
+  if (meas_package.sensor_type_ == MeasurementPackage::LASER) {
+    UpdateLidar(meas_package);
+  } else if (meas_package.sensor_type_ == MeasurementPackage::RADAR) {
+    UpdateRadar(meas_package);
+  }
 }
 
 /**
