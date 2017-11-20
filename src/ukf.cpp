@@ -60,6 +60,32 @@ UKF::UKF() {
   ///* Initialize predictions matrix
   Xsig_pred_ = MatrixXd(n_x_, 2 * n_aug_ + 1);
 
+  ///* Dimensions of lidar and radar measurements
+  n_z_lidar_ = 2;
+  n_z_radar_ = 3;
+
+  ///* Vectors to store lidar and radar measurements
+  z_meas_lidar_ = VectorXd(n_z_lidar_);
+  z_meas_radar_ = VectorXd(n_z_radar_);
+
+  ///* Vectors to store lidar and radar predictions
+  z_pred_lidar_ = VectorXd(n_z_lidar_);
+  z_pred_radar_ = VectorXd(n_z_radar_);
+
+  ///* Matrices to store lidar and radar sigma predictions
+  Zsig_lidar_ = MatrixXd(n_z_lidar_, 2 * n_aug_ + 1);
+  Zsig_radar_ = MatrixXd(n_z_radar_, 2 * n_aug_ + 1);
+
+  ///* Matrices for UpdateLidar
+  S_lidar_ = MatrixXd(n_z_lidar_, n_z_lidar_); // measurement covariance
+  R_lidar_ = MatrixXd(n_z_lidar_, n_z_lidar_); // measurement noise
+  T_lidar_ = MatrixXd(n_x_, n_z_lidar_); // cross-correlation for diffs
+
+  ///* Matrices for UpdateRadar
+  S_radar_ = MatrixXd(n_z_radar_, n_z_radar_); // measurement covariance
+  R_radar_ = MatrixXd(n_z_radar_, n_z_radar_); // measurement noise
+  T_radar_ = MatrixXd(n_x_, n_z_radar_); // cross-correlation for diffs
+
   /**
   TODO: UKF Initialization [DONE]
 
@@ -134,14 +160,14 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
   if (!is_initialized_) {
 
     // Set initial x. NOTE: [pos1 pos2 vel_abs yaw_angle yaw_rate]
-    x_ <<   1, 1, 1, 1, 1;
+    x_ << 1, 1, 1, 1, 1;
 
     // Set initial covariance matrix
-    P_ <<   1, 0, 0, 0, 0,
-            0, 1, 0, 0, 0,
-            0, 0, 1, 0, 0,
-            0, 0, 0, 1, 0,
-            0, 0, 0, 0, 1;
+    P_ << 1, 0, 0, 0, 0,
+        0, 1, 0, 0, 0,
+        0, 0, 1, 0, 0,
+        0, 0, 0, 1, 0,
+        0, 0, 0, 0, 1;
 
     // Process initial measurements
     if (meas_package.sensor_type_ == MeasurementPackage::LASER) {
@@ -158,8 +184,8 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
       // Can determine x and y position
 
       // Extract measurements
-      float rho =     meas_package.raw_measurements_(0);
-      float phi =     meas_package.raw_measurements_(1);
+      float rho = meas_package.raw_measurements_(0);
+      float phi = meas_package.raw_measurements_(1);
 //      float rho_dot = meas_package.raw_measurements_(2); // not used (for now)
 
       // Update state
@@ -245,13 +271,82 @@ void UKF::Prediction(double delta_t) {
  */
 void UKF::UpdateLidar(MeasurementPackage meas_package) {
   /**
-  TODO: UpdateLidar()
+  TODO: UpdateLidar() [DONE]
 
   Complete this function! Use lidar data to update the belief about the object's
   position. Modify the state vector, x_, and covariance, P_.
 
   You'll also need to calculate the lidar NIS.
   */
+
+  // Extract measurement as VectorXd
+  z_meas_lidar_ = meas_package.raw_measurements_;
+
+  // Reset matrix
+  Zsig_lidar_.fill(0.0);
+
+  // Calculate sigma points in measurement space
+  for (int i = 0; i < 2 * n_aug_ + 1; i++) {
+
+    // Extract values for better readibility
+    double p_x = Xsig_pred_(0, i);
+    double p_y = Xsig_pred_(1, i);
+
+    // Measurement model is very simple for lidar
+    Zsig_lidar_(0, i) = p_x;
+    Zsig_lidar_(1, i) = p_y;
+
+  }
+
+  // Calculate predicted measurement
+  // Reset vector
+  z_pred_lidar_.fill(0.0);
+
+  for (int i = 0; i < 2 * n_aug_ + 1; i++) {
+
+    z_pred_lidar_ = z_pred_lidar_ + weights_(i) * Zsig_lidar_.col(i);
+
+  }
+
+  // Reset measurement covariance matrix S
+  S_lidar_.fill(0.0);
+
+  for (int i = 0; i < 2 * n_aug_ + 1; i++) {
+
+    z_diff_lidar_ = Zsig_lidar_.col(i) - z_pred_lidar_;
+    S_lidar_ = S_lidar_ + weights_(i) * z_diff_lidar_ * z_diff_lidar_.transpose();
+
+  }
+
+  // Add measurement noise covariance matrix R
+  R_lidar_ << std_laspx_ * std_laspx_, 0,
+      0, std_laspy_ * std_laspy_;
+  S_lidar_ = S_lidar_ + R_lidar_;
+
+  // Diffs cross correlation matrix T
+  T_lidar_.fill(0.0);
+
+  for (int i = 0; i < 2 * n_aug_ + 1; i++) {  //2n+1 simga points
+
+    // Measurement difference
+    z_diff_lidar_ = Zsig_lidar_.col(i) - z_pred_lidar_;
+
+    // State difference
+    x_diff_ = Xsig_pred_.col(i) - x_;
+
+    T_lidar_ = T_lidar_ + weights_(i) * x_diff_ * z_diff_lidar_.transpose();
+  }
+
+  // Kalman gain K
+  K_lidar_ = T_lidar_ * S_lidar_.inverse();
+
+  // Diff for measurements
+  z_diff_lidar_ = z_meas_lidar_ - z_pred_lidar_;
+
+  // Update state mean and covariance matrix
+  x_ = x_ + K_lidar_ * z_diff_lidar_;
+  P_ = P_ - K_lidar_ * S_lidar_ * K_lidar_.transpose();
+
 }
 
 /**
@@ -303,7 +398,7 @@ void UKF::AugmentedSigmaPoints() {
   for (int i = 0; i < n_aug_; i++) {
 
     // Here we are looping through individual columns of matrix Xsig_aug_
-    Xsig_aug_.col(i + 1)          = x_aug + sqrt(lambda_ + n_aug_) * L.col(i);
+    Xsig_aug_.col(i + 1) = x_aug + sqrt(lambda_ + n_aug_) * L.col(i);
     Xsig_aug_.col(i + 1 + n_aug_) = x_aug - sqrt(lambda_ + n_aug_) * L.col(i);
 
   }
@@ -323,12 +418,12 @@ void UKF::SigmaPointPrediction(float delta_t) {
   for (int i = 0; i < 2 * n_aug_ + 1; i++) {
 
     // Extract values for better readability
-    double p_x      = Xsig_aug_(0, i);
-    double p_y      = Xsig_aug_(1, i);
-    double v        = Xsig_aug_(2, i);
-    double yaw      = Xsig_aug_(3, i);
-    double yawd     = Xsig_aug_(4, i);
-    double nu_a     = Xsig_aug_(5, i);
+    double p_x = Xsig_aug_(0, i);
+    double p_y = Xsig_aug_(1, i);
+    double v = Xsig_aug_(2, i);
+    double yaw = Xsig_aug_(3, i);
+    double yawd = Xsig_aug_(4, i);
+    double nu_a = Xsig_aug_(5, i);
     double nu_yawdd = Xsig_aug_(6, i);
 
     // Predicted state values
@@ -347,16 +442,16 @@ void UKF::SigmaPointPrediction(float delta_t) {
 
     }
 
-    double v_p    = v;
-    double yaw_p  = yaw + yawd * delta_t;
+    double v_p = v;
+    double yaw_p = yaw + yawd * delta_t;
     double yawd_p = yawd;
 
     // Add noise according to equations
-    px_p    = px_p + 0.5 * nu_a * delta_t * delta_t * cos(yaw);
-    py_p    = py_p + 0.5 * nu_a * delta_t * delta_t * sin(yaw);
-    v_p     = v_p + nu_a * delta_t;
-    yaw_p   = yaw_p + 0.5 * nu_yawdd * delta_t * delta_t;
-    yawd_p  = yawd_p + nu_yawdd * delta_t;
+    px_p = px_p + 0.5 * nu_a * delta_t * delta_t * cos(yaw);
+    py_p = py_p + 0.5 * nu_a * delta_t * delta_t * sin(yaw);
+    v_p = v_p + nu_a * delta_t;
+    yaw_p = yaw_p + 0.5 * nu_yawdd * delta_t * delta_t;
+    yawd_p = yawd_p + nu_yawdd * delta_t;
 
     // Write predicted sigma point into i-th column
     Xsig_pred_(0, i) = px_p;
