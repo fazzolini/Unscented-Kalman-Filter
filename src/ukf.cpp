@@ -225,17 +225,11 @@ void UKF::Prediction(double delta_t) {
    * [these calculated mean and variance are then used to update with lidar / radar data]
    */
 
-  /**
-   * TODO: Generate Aug Sigma Points
-   */
+  AugmentedSigmaPoints();
 
-  /**
-   * TODO: Predict Aug Sigma Points
-   */
+  SigmaPointPrediction();
 
-  /**
-   * TODO: Calculate Mean / Variance
-   */
+  PredictMeanAndCovariance();
 
 }
 
@@ -267,4 +261,26 @@ void UKF::UpdateRadar(MeasurementPackage meas_package) {
 
   You'll also need to calculate the radar NIS.
   */
+}
+
+
+void UKF::AugmentedSigmaPoints() {
+  /**
+   * TODO: Generate Aug Sigma Points
+   */
+
+}
+
+void UKF::SigmaPointPrediction() {
+  /**
+   * TODO: Predict Aug Sigma Points
+   */
+
+}
+
+void UKF::PredictMeanAndCovariance() {
+  /**
+   * TODO: Calculate Mean / Variance
+   */
+
 }

@@ -71,7 +71,7 @@ public:
   double lambda_;
 
   /*****************************************************************************
-   *  ADDITIONAL DECLARATIONS
+   *  ADDITIONAL DECLARATIONS OF VARS [START]
    ****************************************************************************/
 
   ///* Used to calculate time difference between measurements
@@ -79,6 +79,10 @@ public:
 
   ///* constant to multiply dt to convert to seconds
   const float MICROSECONDS_PER_SECOND = 1000000.0;
+
+  /*****************************************************************************
+   *  ADDITIONAL DECLARATIONS OF VARS [END]
+   ****************************************************************************/
 
 
   /**
@@ -115,6 +119,36 @@ public:
    * @param meas_package The measurement at k+1
    */
   void UpdateRadar(MeasurementPackage meas_package);
+
+  /*****************************************************************************
+   *  ADDITIONAL DECLARATIONS OF METHODS [START]
+   ****************************************************************************/
+
+  /**
+   * Creates a matrix that stores augmented sigma points according to Unscented
+   * Kalman Filter algorithm covered in classroom.
+   * Takes no params and returns nothing because it operates on class variables.
+   */
+  void AugmentedSigmaPoints();
+
+  /**
+   * Uses augmented sigma points matrix to make predictions
+   * for each point and store it in a separate matrix.
+   * Takes no params and returns nothing because it operates on class variables.
+   */
+  void SigmaPointPrediction();
+
+  /**
+   * Based on sigma points predictions calculate inferred
+   * mean vector and covariance matrix for prediction.
+   * This is the last step of prediction step of UKF.
+   * Takes no params and returns nothing because it operates on class variables.
+   */
+  void PredictMeanAndCovariance();
 };
+
+/*****************************************************************************
+ *  ADDITIONAL DECLARATIONS OF METHODS [END]
+ ****************************************************************************/
 
 #endif /* UKF_H */
