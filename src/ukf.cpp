@@ -216,7 +216,7 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
  */
 void UKF::Prediction(double delta_t) {
   /**
-  TODO: Prediction()
+  TODO: Prediction() [DONE]
 
   Complete this function! Estimate the object's location. Modify the state
   vector, x_. Predict sigma points, the state, and the state covariance matrix.
@@ -370,7 +370,43 @@ void UKF::SigmaPointPrediction(float delta_t) {
 
 void UKF::PredictMeanAndCovariance() {
   /**
-   * TODO: Calculate Mean / Variance
+   * TODO: Calculate Mean / Variance [DONE]
    */
 
+  // Set first weight to a special value
+  weights_(0) = lambda_ / (lambda_ + n_aug_);
+
+  // Set remaining weights to same value
+  for (int i = 1; i < 2 * n_aug_ + 1; i++) {
+
+    weights_(i) = 0.5 / (n_aug_ + lambda_);
+
+  }
+
+  // Reset state mean
+  x_.fill(0.0);
+
+  // Iterate over sigma points, update state mean
+  for (int i = 0; i < 2 * n_aug_ + 1; i++) {
+
+    x_ = x_ + weights_(i) * Xsig_pred_.col(i);
+
+  }
+
+  // Predicted state covariance matrix
+  P_.fill(0.0);
+
+  // Iterate over sigma points
+  for (int i = 0; i < 2 * n_aug_ + 1; i++) {
+
+    // State difference
+    VectorXd x_diff = Xsig_pred_.col(i) - x_;
+
+    // Angle normalization
+    x_diff(3) = tools.NormalizePhi(x_diff(3));
+
+    // Update state covariance matrix
+    P_ = P_ + weights_(i) * x_diff * x_diff.transpose();
+
+  }
 }
