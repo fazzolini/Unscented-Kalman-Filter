@@ -75,10 +75,13 @@ public:
    ****************************************************************************/
 
   ///* Used to calculate time difference between measurements
-  float dt;
+  float dt_;
 
-  ///* constant to multiply dt to convert to seconds
-  const float MICROSECONDS_PER_SECOND = 1000000.0;
+  ///* Constant to multiply dt to convert to seconds
+  const float MICROSECONDS_PER_SECOND_ = 1000000.0;
+
+  ///* Augmented state matrix
+  MatrixXd Xsig_aug_;
 
   /*****************************************************************************
    *  ADDITIONAL DECLARATIONS OF VARS [END]
