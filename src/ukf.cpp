@@ -52,7 +52,7 @@ UKF::UKF() {
    ****************************************************************************/
 
   ///* Used to calculate time difference between measurements
-  dt = 0.0;
+  dt_ = 0.0;
 
   /**
   TODO: UKF Initialization [DONE]
@@ -180,12 +180,12 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
    */
 
   // Calculate how much time between measurements (in seconds); time_us_ is old value
-  dt = (meas_package.timestamp_ - time_us_) * MICROSECONDS_PER_SECOND;
+  dt_ = (meas_package.timestamp_ - time_us_) * MICROSECONDS_PER_SECOND_;
   // Update time_us_ to current value
   time_us_ = meas_package.timestamp_;
 
   // Call predict step
-  Prediction(dt);
+  Prediction(dt_);
 
   /*****************************************************************************
    *  3. Measurement Update
@@ -266,8 +266,41 @@ void UKF::UpdateRadar(MeasurementPackage meas_package) {
 
 void UKF::AugmentedSigmaPoints() {
   /**
-   * TODO: Generate Aug Sigma Points
+   * TODO: Generate Aug Sigma Points [DONE]
    */
+
+  // Create augmented mean vector
+  VectorXd x_aug = VectorXd(n_aug_);
+
+  // Create augmented state covariance
+  MatrixXd P_aug = MatrixXd(n_aug_, n_aug_);
+
+  // Create sigma point matrix
+  Xsig_aug_ = MatrixXd(n_aug_, 2 * n_aug_ + 1);
+
+  // Create augmented mean state
+  x_aug.head(5) = x_;
+  x_aug(5) = 0;
+  x_aug(6) = 0;
+
+  // Create augmented covariance matrix
+  P_aug.fill(0.0);
+  P_aug.topLeftCorner(5, 5) = P_; // top-left 5x5 block
+  P_aug(5, 5) = std_a_ * std_a_; // variance of a
+  P_aug(6, 6) = std_yawdd_ * std_yawdd_; // variance of yawdd
+
+  // Create square root matrix
+  MatrixXd L = P_aug.llt().matrixL(); // Cholesky decomposition
+
+  // Create augmented sigma points
+  Xsig_aug_.col(0) = x_aug;
+  for (int i = 0; i < n_aug_; i++) {
+
+    // Here we are looping through individual columns of matrix Xsig_aug_
+    Xsig_aug_.col(i + 1)          = x_aug + sqrt(lambda_ + n_aug_) * L.col(i);
+    Xsig_aug_.col(i + 1 + n_aug_) = x_aug - sqrt(lambda_ + n_aug_) * L.col(i);
+
+  }
 
 }
 
