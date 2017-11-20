@@ -17,6 +17,9 @@ UKF::UKF() {
   // If this is false, radar measurements will be ignored (except during init)
   use_radar_ = true;
 
+  // If both use_laser_ and ude_radar_ are false
+  ignore_laser_radar = !use_laser_ && !use_radar_;
+
   // Initial state vector
   x_ = VectorXd(5);
 
@@ -110,7 +113,9 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
    * TODO: Initialize
    */
 
-  // code
+  if (!is_initialized_) {
+    // code
+  }
 
   /*****************************************************************************
    *  2. Prediction

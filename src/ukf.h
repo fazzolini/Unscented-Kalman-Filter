@@ -22,6 +22,9 @@ public:
   ///* If this is false, radar measurements will be ignored (except for init) [OK]
   bool use_radar_;
 
+  ///* For the case when both laser and radar are ignored (degenerate case?)
+  bool ignore_laser_radar;
+
   ///* State vector: [pos1 pos2 vel_abs yaw_angle yaw_rate] in SI units and rad [OK]
   VectorXd x_; // initialized
 
