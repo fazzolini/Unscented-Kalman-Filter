@@ -24,6 +24,11 @@ public:
   */
   VectorXd CalculateRMSE(const vector<VectorXd> &estimations, const vector<VectorXd> &ground_truth);
 
+  /**
+   * A helper method to make sure phi is in range from -pi to +pi
+   */
+  float NormalizePhi(float &original_phi);
+
 };
 
 #endif /* TOOLS_H_ */
