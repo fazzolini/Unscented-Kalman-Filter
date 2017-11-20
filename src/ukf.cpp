@@ -51,6 +51,9 @@ UKF::UKF() {
    *  ADDITIONAL INITIALIZATIONS
    ****************************************************************************/
 
+  ///* Used to calculate time difference between measurements
+  dt = 0.0;
+
   /**
   TODO: [DONE]
 
@@ -172,10 +175,17 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
    ****************************************************************************/
 
   /**
-   * TODO: Predict
+   * TODO: Predict [DONE]
+   * This is the part where UKF magic happens
    */
 
-  // code
+  // Calculate how much time between measurements (in seconds); time_us_ is old value
+  dt = (meas_package.timestamp_ - time_us_) * MICROSECONDS_PER_SECOND;
+  // Update time_us_ to current value
+  time_us_ = meas_package.timestamp_;
+
+  // Call predict step
+  Prediction(dt);
 
   /*****************************************************************************
    *  3. Measurement Update

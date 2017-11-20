@@ -74,6 +74,12 @@ public:
    *  ADDITIONAL DECLARATIONS
    ****************************************************************************/
 
+  ///* Used to calculate time difference between measurements
+  float dt;
+
+  ///* constant to multiply dt to convert to seconds
+  const float MICROSECONDS_PER_SECOND = 1000000.0;
+
 
   /**
    * Constructor
