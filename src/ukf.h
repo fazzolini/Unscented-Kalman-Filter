@@ -90,6 +90,41 @@ public:
   ///* Instance of tools
   Tools tools_;
 
+  ///* Dimensions of lidar and radar measurements
+  int n_z_lidar_;
+  int n_z_radar_;
+
+  ///* Store difference for state
+  VectorXd x_diff_;
+
+  ///* Vectors to store lidar and radar measurements
+  VectorXd z_meas_lidar_;
+  VectorXd z_meas_radar_;
+
+  ///* Vectors to store lidar and radar predictions
+  VectorXd z_pred_lidar_;
+  VectorXd z_pred_radar_;
+
+  ///* Vectors to store lidar and radar predictions diffs
+  VectorXd z_diff_lidar_;
+  VectorXd z_diff_radar_;
+
+  ///* Matrices to store lidar and radar sigma predictions
+  MatrixXd Zsig_lidar_;
+  MatrixXd Zsig_radar_;
+
+  ///* Matrices for UpdateLidar
+  MatrixXd S_lidar_; // measurement covariance
+  MatrixXd R_lidar_; // measurement noise
+  MatrixXd T_lidar_; // cross-correlation for diffs
+  MatrixXd K_lidar_; // kalman gain
+
+  ///* Matrices for UpdateRadar
+  MatrixXd S_radar_; // measurement covariance
+  MatrixXd R_radar_; // measurement noise
+  MatrixXd T_radar_; // cross-correlation for diffs
+  MatrixXd K_radar_; // kalman gain
+
   /*****************************************************************************
    *  ADDITIONAL DECLARATIONS OF VARS [END]
    ****************************************************************************/
