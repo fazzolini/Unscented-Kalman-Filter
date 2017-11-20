@@ -215,6 +215,28 @@ void UKF::Prediction(double delta_t) {
   Complete this function! Estimate the object's location. Modify the state
   vector, x_. Predict sigma points, the state, and the state covariance matrix.
   */
+
+  /**
+   * Unscented Kalman Filter algorithm is implemented in this module.
+   * The steps are:
+   * 1. generate augmented sigma points
+   * 2. predict augmented sigma points
+   * 3. calculate mean/variance of predicted sigma points
+   * [these calculated mean and variance are then used to update with lidar / radar data]
+   */
+
+  /**
+   * TODO: Generate Aug Sigma Points
+   */
+
+  /**
+   * TODO: Predict Aug Sigma Points
+   */
+
+  /**
+   * TODO: Calculate Mean / Variance
+   */
+
 }
 
 /**
