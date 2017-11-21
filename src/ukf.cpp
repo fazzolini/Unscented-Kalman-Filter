@@ -72,14 +72,17 @@ UKF::UKF() {
   ///* Augmented state dimension (state dim + 2 for process noise)
   n_aug_ = n_x_ + 2;
 
-  ///* Weights of sigma points (center point + 2 for each dimension of augmented vector)
-  weights_ = VectorXd(2 * n_aug_ + 1);
-
-//  ///* Predicted sigma points matrix (rows: state vector length, cols: num of sigma points)
-//  Xsig_pred_ = MatrixXd(n_x_, 2 * n_aug_ + 1);
-
   ///* Sigma point spreading parameter (as per classroom solution)
   lambda_ = 3 - n_x_;
+
+  ///* Weights of sigma points (center point + 2 for each dimension of augmented vector)
+  weights_ = VectorXd(2 * n_aug_ + 1);
+  // Set first weight to a special value
+  weights_(0) = lambda_ / (lambda_ + n_aug_);
+  // Set remaining weights to same value
+  for (int i = 1; i < 2 * n_aug_ + 1; i++) {
+    weights_(i) = 0.5 / (n_aug_ + lambda_);
+  }
 
   /*****************************************************************************
    *  ADDITIONAL INITIALIZATIONS [START]
@@ -94,6 +97,12 @@ UKF::UKF() {
   ///* Initialize predictions matrix
   Xsig_pred_ = MatrixXd(n_x_, 2 * n_aug_ + 1);
 
+  ///* Create augmented mean vector
+  x_aug_ = VectorXd(n_aug_);
+
+  ///* Create augmented state covariance
+  P_aug_ = MatrixXd(n_aug_, n_aug_);
+
   ///* Dimensions of lidar and radar measurements
   n_z_lidar_ = 2;
   n_z_radar_ = 3;
@@ -105,6 +114,10 @@ UKF::UKF() {
   ///* Vectors to store lidar and radar predictions
   z_pred_lidar_ = VectorXd(n_z_lidar_);
   z_pred_radar_ = VectorXd(n_z_radar_);
+
+  ///* Vectors to store lidar and radar predictions diffs
+  z_diff_lidar_ = VectorXd(n_z_lidar_);
+  z_diff_radar_ = VectorXd(n_z_radar_);
 
   ///* Matrices to store lidar and radar sigma predictions
   Zsig_lidar_ = MatrixXd(n_z_lidar_, 2 * n_aug_ + 1);
@@ -460,34 +473,28 @@ void UKF::AugmentedSigmaPoints() {
   // Clear old values (possibly not needed)
   Xsig_aug_.fill(0.0);
 
-  // Create augmented mean vector
-  VectorXd x_aug = VectorXd(n_aug_);
-
-  // Create augmented state covariance
-  MatrixXd P_aug = MatrixXd(n_aug_, n_aug_);
-
   // Create augmented mean state
-  x_aug.head(5) = x_;
-  x_aug(5) = 0;
-  x_aug(6) = 0;
+  x_aug_.head(5) = x_;
+  x_aug_(5) = 0;
+  x_aug_(6) = 0;
 
   // Create augmented covariance matrix
-  P_aug.fill(0.0);
-  P_aug.topLeftCorner(5, 5) = P_; // top-left 5x5 block
-  P_aug(5, 5) = std_a_ * std_a_; // variance of a
-  P_aug(6, 6) = std_yawdd_ * std_yawdd_; // variance of yawdd
+  P_aug_.fill(0.0);
+  P_aug_.topLeftCorner(5, 5) = P_; // top-left 5x5 block
+  P_aug_(5, 5) = std_a_ * std_a_; // variance of a
+  P_aug_(6, 6) = std_yawdd_ * std_yawdd_; // variance of yawdd
 
   // Create square root matrix
-  MatrixXd L = P_aug.llt().matrixL(); // Cholesky decomposition
+  MatrixXd L = P_aug_.llt().matrixL(); // Cholesky decomposition
 
   // Create augmented sigma points
 //  MatrixXd Xsig_aug_ = MatrixXd(n_aug_, 2 * n_aug_ + 1);
-  Xsig_aug_.col(0) = x_aug;
+  Xsig_aug_.col(0) = x_aug_;
   for (int i = 0; i < n_aug_; i++) {
 
     // Here we are looping through individual columns of matrix Xsig_aug_
-    Xsig_aug_.col(i + 1) = x_aug + sqrt(lambda_ + n_aug_) * L.col(i);
-    Xsig_aug_.col(i + 1 + n_aug_) = x_aug - sqrt(lambda_ + n_aug_) * L.col(i);
+    Xsig_aug_.col(i + 1) = x_aug_ + sqrt(lambda_ + n_aug_) * L.col(i);
+    Xsig_aug_.col(i + 1 + n_aug_) = x_aug_ - sqrt(lambda_ + n_aug_) * L.col(i);
 
   }
 }
@@ -555,16 +562,6 @@ void UKF::PredictMeanAndCovariance() {
   /**
    * TODO: Calculate Mean / Variance [DONE]
    */
-
-  // Set first weight to a special value
-  weights_(0) = lambda_ / (lambda_ + n_aug_);
-
-  // Set remaining weights to same value
-  for (int i = 1; i < 2 * n_aug_ + 1; i++) {
-
-    weights_(i) = 0.5 / (n_aug_ + lambda_);
-
-  }
 
   // Reset state mean
   x_.fill(0.0);

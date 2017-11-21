@@ -84,6 +84,12 @@ public:
   ///* Augmented state matrix
   MatrixXd Xsig_aug_;
 
+  ///* Create augmented mean vector
+  VectorXd x_aug_;
+
+  ///* Create augmented state covariance
+  MatrixXd P_aug_;
+
   ///* Instance of tools
   Tools tools_;
 
