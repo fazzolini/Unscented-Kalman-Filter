@@ -229,7 +229,7 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
    */
 
   // Calculate how much time between measurements (in seconds); time_us_ is old value
-  dt_ = (meas_package.timestamp_ - time_us_) * MICROSECONDS_PER_SECOND_;
+  dt_ = (meas_package.timestamp_ - time_us_) / MICROSECONDS_PER_SECOND_;
   // Update time_us_ to current value
   time_us_ = meas_package.timestamp_;
 
