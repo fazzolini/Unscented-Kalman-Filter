@@ -84,9 +84,6 @@ public:
   ///* Augmented state matrix
   MatrixXd Xsig_aug_;
 
-  ///* Predicted sigma points
-  MatrixXd Xsig_pred_;
-
   ///* Instance of tools
   Tools tools_;
 
