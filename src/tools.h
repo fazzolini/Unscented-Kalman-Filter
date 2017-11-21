@@ -29,6 +29,8 @@ public:
    */
   float NormalizePhi(float &original_phi);
 
+  double NormalizePhi(double &original_phi);
+
 };
 
 #endif /* TOOLS_H_ */

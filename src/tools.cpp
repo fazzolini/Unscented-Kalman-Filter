@@ -68,3 +68,17 @@ float Tools::NormalizePhi(float &original_phi) {
   }
   return original_phi;
 }
+
+double Tools::NormalizePhi(double &original_phi) {
+  const auto pi = double(M_PI); // use C++ math.h M_PI, cast double to float
+  if (original_phi > pi) {
+    while (original_phi > pi) {
+      original_phi = original_phi - 2 * pi;
+    }
+  } else if (original_phi < -pi) {
+    while (original_phi < -pi) {
+      original_phi = original_phi + 2 * pi;
+    }
+  }
+  return original_phi;
+}
