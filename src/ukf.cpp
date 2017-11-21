@@ -288,7 +288,7 @@ void UKF::UpdateLidar(MeasurementPackage meas_package) {
   // Calculate sigma points in measurement space
   for (int i = 0; i < 2 * n_aug_ + 1; i++) {
 
-    // Extract values for better readibility
+    // Extract values for better readability
     double p_x = Xsig_pred_(0, i);
     double p_y = Xsig_pred_(1, i);
 
@@ -326,7 +326,7 @@ void UKF::UpdateLidar(MeasurementPackage meas_package) {
   // Diffs cross correlation matrix T
   T_lidar_.fill(0.0);
 
-  for (int i = 0; i < 2 * n_aug_ + 1; i++) {  //2n+1 simga points
+  for (int i = 0; i < 2 * n_aug_ + 1; i++) {
 
     // Measurement difference
     z_diff_lidar_ = Zsig_lidar_.col(i) - z_pred_lidar_;
@@ -362,6 +362,89 @@ void UKF::UpdateRadar(MeasurementPackage meas_package) {
 
   You'll also need to calculate the radar NIS.
   */
+
+  // Extract measurements for easier access
+  z_meas_radar_ = meas_package.raw_measurements_;
+
+  // Transform sigma points to measurement space
+  for (int i = 0; i < 2 * n_aug_ + 1; i++) {
+
+    // Extract values for better readability
+    double p_x = Xsig_pred_(0, i);
+    double p_y = Xsig_pred_(1, i);
+    double v = Xsig_pred_(2, i);
+    double yaw = Xsig_pred_(3, i);
+
+    double v1 = cos(yaw) * v;
+    double v2 = sin(yaw) * v;
+
+    // Measurement model
+    Zsig_radar_(0, i) = sqrt(p_x * p_x + p_y * p_y);                          //rho
+    Zsig_radar_(1, i) = atan2(p_y, p_x);                                      //phi
+    Zsig_radar_(2, i) = (p_x * v1 + p_y * v2) / sqrt(p_x * p_x + p_y * p_y);  //rho_dot
+
+  }
+
+  // Mean predicted measurement
+  z_pred_radar_.fill(0.0);
+  for (int i = 0; i < 2 * n_aug_ + 1; i++) {
+    z_pred_radar_ = z_pred_radar_ + weights_(i) * Zsig_radar_.col(i);
+  }
+
+  // Measurement covariance matrix S
+  S_radar_.fill(0.0);
+
+  for (int i = 0; i < 2 * n_aug_ + 1; i++) {
+
+    // Measurement diff
+    z_diff_radar_ = Zsig_radar_.col(i) - z_pred_radar_;
+
+    // Angle normalization
+    z_diff_radar_(1) = tools_.NormalizePhi(z_diff_radar_(1));
+
+    S_radar_ = S_radar_ + weights_(i) * z_diff_radar_ * z_diff_radar_.transpose();
+
+  }
+
+  // Add measurement noise covariance matrix
+  R_radar_ << std_radr_ * std_radr_, 0, 0,
+      0, std_radphi_ * std_radphi_, 0,
+      0, 0, std_radrd_ * std_radrd_;
+  S_radar_ = S_radar_ + R_radar_;
+
+  // Diffs cross correlation matrix T
+  T_radar_.fill(0.0);
+  for (int i = 0; i < 2 * n_aug_ + 1; i++) {
+
+    // Difference of predictions
+    z_diff_radar_ = Zsig_radar_.col(i) - z_pred_radar_;
+
+    // Angle normalization
+    z_diff_radar_(1) = tools_.NormalizePhi(z_diff_radar_(1));
+
+    // State difference
+    x_diff_ = Xsig_pred_.col(i) - x_;
+
+    // Angle normalization
+    x_diff_(3) = tools_.NormalizePhi(x_diff_(3));
+
+    T_radar_ = T_radar_ + weights_(i) * x_diff_ * z_diff_radar_.transpose();
+
+  }
+
+  // Kalman gain
+  K_radar_ = T_radar_ * S_radar_.inverse();
+
+  // Diff for measurement
+  z_diff_radar_ = z_meas_radar_ - z_pred_radar_;
+
+  // Angle normalization
+  z_diff_radar_(1) = tools_.NormalizePhi(z_diff_radar_(1));
+
+  // Update state mean and covariance matrix
+  x_ = x_ + K_radar_ * z_diff_radar_;
+  P_ = P_ - K_radar_ * S_radar_ * K_radar_.transpose();
+
 }
 
 
