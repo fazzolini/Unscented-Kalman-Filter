@@ -47,8 +47,42 @@ UKF::UKF() {
   // Radar measurement noise standard deviation radius change in m/s
   std_radrd_ = 0.3;
 
+  /**
+  TODO: UKF Initialization [DONE]
+
+  Complete the initialization. See ukf.h for other member properties.
+
+  Hint: one or more values initialized above might be wildly off...
+  */
+
+  /**
+   * Note: I consecutively checked ukf.h for which vars were already
+   * initialized above and then initialized myself missing ones
+   */
+
+  ///* Initially set to false, set to true in first call of ProcessMeasurement
+  is_initialized_ = false;
+
+  ///* Time when the state is true, in us (initial time is zero)
+  time_us_ = 0.0;
+
+  ///* State dimension (as per CTRV model)
+  n_x_ = 5;
+
+  ///* Augmented state dimension (state dim + 2 for process noise)
+  n_aug_ = n_x_ + 2;
+
+  ///* Weights of sigma points (center point + 2 for each dimension of augmented vector)
+  weights_ = VectorXd(2 * n_aug_ + 1);
+
+//  ///* Predicted sigma points matrix (rows: state vector length, cols: num of sigma points)
+//  Xsig_pred_ = MatrixXd(n_x_, 2 * n_aug_ + 1);
+
+  ///* Sigma point spreading parameter (as per classroom solution)
+  lambda_ = 3 - n_x_;
+
   /*****************************************************************************
-   *  ADDITIONAL INITIALIZATIONS
+   *  ADDITIONAL INITIALIZATIONS [START]
    ****************************************************************************/
 
   ///* Used to calculate time difference between measurements
@@ -86,39 +120,9 @@ UKF::UKF() {
   R_radar_ = MatrixXd(n_z_radar_, n_z_radar_); // measurement noise
   T_radar_ = MatrixXd(n_x_, n_z_radar_); // cross-correlation for diffs
 
-  /**
-  TODO: UKF Initialization [DONE]
-
-  Complete the initialization. See ukf.h for other member properties.
-
-  Hint: one or more values initialized above might be wildly off...
-  */
-
-  /**
-   * Note: I consecutively checked ukf.h for which vars were already
-   * initialized above and then initialized myself missing ones
-   */
-
-  ///* Initially set to false, set to true in first call of ProcessMeasurement
-  is_initialized_ = false;
-
-  ///* Time when the state is true, in us (initial time is zero)
-  time_us_ = 0.0;
-
-  ///* State dimension (as per CTRV model)
-  n_x_ = 5;
-
-  ///* Augmented state dimension (state dim + 2 for process noise)
-  n_aug_ = n_x_ + 2;
-
-  ///* Weights of sigma points (center point + 2 for each dimension of augmented vector)
-  weights_ = VectorXd(2 * n_aug_ + 1);
-
-  ///* Predicted sigma points matrix (rows: state vector length, cols: num of sigma points)
-  Xsig_pred_ = MatrixXd(n_x_, 2 * n_aug_ + 1);
-
-  ///* Sigma point spreading parameter (as per classroom solution)
-  lambda_ = 3 - n_x_;
+  /*****************************************************************************
+   *  ADDITIONAL INITIALIZATIONS [END]
+   ****************************************************************************/
 
 }
 
@@ -477,6 +481,7 @@ void UKF::AugmentedSigmaPoints() {
   MatrixXd L = P_aug.llt().matrixL(); // Cholesky decomposition
 
   // Create augmented sigma points
+//  MatrixXd Xsig_aug_ = MatrixXd(n_aug_, 2 * n_aug_ + 1);
   Xsig_aug_.col(0) = x_aug;
   for (int i = 0; i < n_aug_; i++) {
 
@@ -493,7 +498,7 @@ void UKF::SigmaPointPrediction(float delta_t) {
    */
 
   // Clear old values (possibly not needed)
-  Xsig_pred_.fill(0.0);
+//  Xsig_pred_.fill(0.0);
 
   // Loop through generated sigma points and
   // make prediction for each one of them.
